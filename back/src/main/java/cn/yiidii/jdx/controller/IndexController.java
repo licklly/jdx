@@ -5,14 +5,15 @@ import cn.hutool.core.util.PhoneUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.yiidii.jdx.config.prop.JDUserConfigProperties;
 import cn.yiidii.jdx.config.prop.SystemConfigProperties;
-import cn.yiidii.jdx.config.prop.SystemConfigProperties.QLConfig;
 import cn.yiidii.jdx.model.R;
 import cn.yiidii.jdx.model.dto.JdInfo;
 import cn.yiidii.jdx.model.ex.BizException;
 import cn.yiidii.jdx.service.JdService;
 import cn.yiidii.jdx.service.QLService;
 import cn.yiidii.jdx.util.JDXUtil;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import java.util.List;
 import java.util.stream.Collectors;
 import javax.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -96,7 +97,20 @@ public class IndexController {
         jo.put("title", systemConfigProperties.getTitle());
         jo.put("notice", systemConfigProperties.getNotice());
         jo.put("noticeModel", systemConfigProperties.getNoticeModel());
-        jo.put("qls", systemConfigProperties.getQls().stream().map(QLConfig::getDisplayName).distinct().collect(Collectors.toList()));
+        List<JSONObject> qls = systemConfigProperties.getQls().stream().map(e -> {
+            JSONObject j = JSON.parseObject(JSON.toJSONString(e));
+            j.remove("url");
+            j.remove("clientId");
+            j.remove("clientSecret");
+            String desc = e.getDisabled() == 1 ? "（已禁用）" : e.getUsed() >= e.getMax() ? "（车位已满）" : "";
+            if (e.getUsed() >= e.getMax()) {
+                j.put("disabled", 1);
+            }
+            j.put("displayNameWithDesc", e.getDisplayName() + desc);
+            return j;
+        }).collect(Collectors.toList());
+        jo.put("qls", qls);
+
         jo.put("wxPusherQrUrl", jdUserConfigProperties.getWxPusherQrUrl());
         return R.ok(jo);
     }

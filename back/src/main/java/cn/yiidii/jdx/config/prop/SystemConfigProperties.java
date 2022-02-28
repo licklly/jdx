@@ -88,6 +88,12 @@ public class SystemConfigProperties implements InitializingBean, ITask {
         private String clientId;
         @NotNull(message = "clientSecret不能为空")
         private String clientSecret;
+
+        private Integer used = 0;
+        @NotNull(message = "最大数量不能为空")
+        private Integer max = 30;
+        @NotNull(message = "是否禁用必选")
+        private Integer disabled = 0;
     }
 
     public QLConfig getQLConfigByDisplayName(String displayName) {

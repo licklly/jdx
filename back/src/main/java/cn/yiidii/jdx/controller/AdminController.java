@@ -8,6 +8,7 @@ import cn.yiidii.jdx.model.R;
 import cn.yiidii.jdx.model.ex.BizException;
 import cn.yiidii.jdx.service.AdminService;
 import cn.yiidii.jdx.service.JDTaskService;
+import cn.yiidii.jdx.support.GithubVersionListener;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import java.util.List;
@@ -40,6 +41,7 @@ public class AdminController {
     private final SystemConfigProperties systemConfigProperties;
     private final JDUserConfigProperties jdUserConfigProperties;
     private final JDTaskService jdTaskService;
+    private final GithubVersionListener githubVersionListener;
 
     @GetMapping("ql")
     public R<?> qlConfig() {
@@ -69,6 +71,17 @@ public class AdminController {
         result.put("noticeModel", systemConfigProperties.getNoticeModel());
         result.put("checkCookieCron", systemConfigProperties.getCheckCookieCron());
         return R.ok(result);
+    }
+
+    @GetMapping("version")
+    public R<?> getVersion() {
+        return R.ok(githubVersionListener.getVersionInfo());
+    }
+
+    @PostMapping("checkUpgrade")
+    public R<?> checkUpgrade() {
+        githubVersionListener.checkUpgrade();
+        return R.ok(githubVersionListener.getVersionInfo());
     }
 
     @PutMapping("websiteConfig")

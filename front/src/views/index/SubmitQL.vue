@@ -40,6 +40,7 @@
     <van-popup v-model="showQLPicker" round position="bottom">
       <van-picker
         show-toolbar
+        value-key="displayNameWithDesc"
         :columns="qls"
         @cancel="showQLPicker = false"
         @confirm="conformQL"
@@ -73,15 +74,15 @@ export default {
         .then(resp => {
           this.qls = resp.data.qls;
           if (this.qls.length > 0) {
-            this.form.displayName = this.qls[0];
+            this.form.displayName = this.qls[0].displayName;
           }
         })
         .catch(err => {
           console.log(err);
         });
     },
-    conformQL(qlId) {
-      this.form.displayName = qlId;
+    conformQL(ql) {
+      this.form.displayName = ql.displayName;
       this.showQLPicker = false;
     },
     submitCk() {

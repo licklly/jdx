@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * QLService
@@ -42,6 +41,24 @@ public class QLService implements ITask {
     private final ScheduleTaskUtil scheduleTaskUtil;
 
     public void submitCk(String displayName, String cookie, String remark) throws Exception {
+        // 校验
+        QLConfig qlConfig = systemConfigProperties.getQLConfigByDisplayName(displayName);
+        if (Objects.isNull(qlConfig)) {
+            throw new BizException(StrUtil.format("青龙节点【{}】不存在", displayName));
+        }
+        // 禁用校验
+        if (qlConfig.getDisabled() == 1) {
+            throw new BizException(StrUtil.format("节点【{}】已禁用", displayName));
+        }
+        // 最大数量校验
+        Integer used = qlConfig.getUsed();
+        List<JSONObject> normalEnvs = this.searchEnv(displayName, "JD_COOKIE", 0);
+        if (normalEnvs.size() >= qlConfig.getMax()) {
+            qlConfig.setUsed(used);
+            throw new BizException(StrUtil.format("节点【{}】车位已满", displayName));
+        }
+        qlConfig.setUsed( normalEnvs.size());
+
         // 获取存在的env, env存在就不更新备注
         String ptPin = JDXUtil.getPtPinFromCK(cookie);
         JSONObject existEnv = this.getExistCK(displayName, StrUtil.format("pt_pin={};", ptPin));
@@ -114,6 +131,19 @@ public class QLService implements ITask {
             }
         }
 
+    }
+
+    /**
+     * 搜索环境变量
+     *
+     * @param displayName
+     * @param searchValue
+     * @param status      0：正常；1：禁用
+     * @return
+     */
+    public List<JSONObject> searchEnv(String displayName, String searchValue, Integer status) {
+        List<JSONObject> envs = this.searchEnv(displayName, searchValue);
+        return envs.stream().filter(e -> e.getInteger("status").compareTo(status) == 0).collect(Collectors.toList());
     }
 
     public List<JSONObject> searchEnv(String displayName, String searchValue) {

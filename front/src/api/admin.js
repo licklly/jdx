@@ -88,3 +88,18 @@ export function updateAccount(data) {
     data: data
   });
 }
+
+// 版本信息
+export function getVersion() {
+  return request({
+    url: "admin/version",
+    method: "get"
+  });
+}
+export function checkUpgrade() {
+  return request({
+    url: "admin/checkUpgrade",
+    method: "post"
+  });
+}
+

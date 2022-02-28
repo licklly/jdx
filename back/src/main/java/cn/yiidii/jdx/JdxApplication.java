@@ -1,5 +1,6 @@
 package cn.yiidii.jdx;
 
+import cn.hutool.extra.spring.SpringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -16,7 +17,7 @@ public class JdxApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(JdxApplication.class, args);
-        log.info("系统启动成功");
+        log.info("系统启动成功[v{}]", SpringUtil.getProperty("spring.application.version"));
     }
 
 }

@@ -1,5 +1,21 @@
 <template>
   <div style="padding: 16px ">
+    <!-- 版本信息 -->
+    <div style="text-align: center">
+      <van-divider
+          :style="{ color: '#1989fa', borderColor: '#1989fa', padding: '0 16px' }"
+      >版本信息
+      </van-divider>
+      <div style="color: #909399; font-size: 14px;margin-bottom: 16px">版本号: v{{versionInfo.appVersion}}</div>
+      <div v-if="versionInfo.needUpgrade && versionInfo.latestVersion" style="color: #F56C6C; font-size: 14px;margin-bottom: 16px">检测到可用版本: v{{versionInfo.latestVersion}}</div>
+      <van-button
+          color="linear-gradient(to right, #ff6034, #ee0a24)"
+          @click="checkUpgrade()"
+          size="small"
+      >
+        检查更新
+      </van-button>
+    </div>
     <!-- 声明 -->
     <div>
       <van-divider
@@ -60,6 +76,8 @@
 </template>
 
 <script>
+import {getVersion,checkUpgrade} from "@/api/admin";
+
 export default {
   name: "About",
   data() {
@@ -108,8 +126,28 @@ export default {
             "调整：移除社交登录，改为用户名密码登录"
           ]
         }
-      ]
+      ],
+      versionInfo: {
+        appVersion: '',
+        latestVersion: '',
+        needUpgrade: false,
+      }
     };
+  },
+  mounted() {
+    this.getVersion()
+  },
+  methods: {
+    getVersion: function (){
+      getVersion().then(resp => {
+        this.versionInfo = resp.data
+      })
+    },
+    checkUpgrade: function (){
+      checkUpgrade().then(resp => {
+        this.versionInfo = resp.data
+      })
+    }
   }
 };
 </script>
@@ -127,11 +165,4 @@ li {
   margin-top: 16px;
 }
 
-.timeline {
-  color: #909399;
-}
-
-.log-item {
-  margin: 4px 0;
-}
 </style>
